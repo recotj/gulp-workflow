@@ -103,3 +103,5 @@ const entry = (done) => {
 		done(null, out);
 	});
 };
+
+module.exports = {basic, min, packages, modules, entry};
