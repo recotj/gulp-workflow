@@ -1,45 +1,15 @@
 const path = require('path');
 const gulp = require('gulp');
 
-const PACKAGE_PREFIX = '';
+const replace = require('../tools/paths').replace;
 
-const isWin32 = (path.win32 === path);
-const srcEx = isWin32 ? /(packages\\[^\\]+)\\src\\/ : /(packages\/[^\/]+)\/src\//;
-const libFragment = isWin32 ? '$1\\lib\\' : '$1/lib/';
+module.exports.packages = packages;
+module.exports.modules = modules;
+module.exports.entry = entry;
+module.exports.basic = basic;
+module.exports.min = min;
 
-const basic = (done) => {
-	const browserify = require('browserify');
-	const makeVinylStream = require('vinyl-source-stream');
-	const browserifyConfig = require('../config/browserify');
-
-	const {outfile, ...options} = browserifyConfig.basic;
-
-	return browserify(options)
-		.bundle()
-		.pipe(makeVinylStream(path.basename(outfile)))
-		.pipe(gulp.dest(path.dirname(outfile)));
-};
-
-const min = (done) => {
-	const browserify = require('browserify');
-	const uglify = require('gulp-uglify');
-	const makeVinylStream = require('vinyl-source-stream');
-	const makeVinylBuffer = require('vinyl-buffer');
-
-	const browserifyConfig = require('../config/browserify');
-	const uglifyConfig = require('../config/uglify');
-
-	const {outfile, ...options} = browserifyConfig.min;
-
-	return browserify(options)
-		.bundle()
-		.pipe(makeVinylStream(path.basename(outfile)))
-		.pipe(makeVinylBuffer())
-		.pipe(uglify(uglifyConfig.basic))
-		.pipe(gulp.dest(path.dirname(outfile)));
-};
-
-const packages = (done) => {
+function packages(done) {
 	const plumber = require('gulp-plumber');
 	const gutil = require('gulp-util');
 	const newer = require('gulp-newer');
@@ -54,20 +24,20 @@ const packages = (done) => {
 			}
 		}))
 		.pipe(through.obj((file, enc, callback) => {
-			file._path = file.path;
-			file.path = file.path.replace(srcEx, libFragment);
+			const path = file.srcPath = file.path;
+			file.path = replace(path, /(packages\/[^\/]+)\/src\//, '$1/lib/');
 			callback(null, file);
 		}))
 		.pipe(newer(PACKAGES_PATH))
 		.pipe(through.obj((file, enc, callback) => {
-			gutil.log('compiling', `'${chalk.cyan(file._path)}'...`);
+			gutil.log('compiling', `'${chalk.cyan(file.srcPath)}'...`);
 			callback(null, file);
 		}))
 		.pipe(babel())
 		.pipe(gulp.dest(PACKAGES_PATH));
-};
+}
 
-const modules = (done) => {
+function modules(done) {
 	const plumber = require('gulp-plumber');
 	const gutil = require('gulp-util');
 
@@ -78,9 +48,9 @@ const modules = (done) => {
 			}
 		}))
 		.pipe(gulp.dest(DIST_PATH));
-};
+}
 
-const entry = (done) => {
+function entry(done) {
 	const stream = require('stream');
 	const pass = stream.PassThrough();
 	const fs = require('fs');
@@ -102,6 +72,36 @@ const entry = (done) => {
 
 		done(null, out);
 	});
-};
+}
 
-module.exports = {basic, min, packages, modules, entry};
+function basic(done) {
+	const browserify = require('browserify');
+	const makeVinylStream = require('vinyl-source-stream');
+	const browserifyConfig = require('../config/browserify');
+
+	const {outfile, ...options} = browserifyConfig.basic;
+
+	return browserify(options)
+		.bundle()
+		.pipe(makeVinylStream(path.basename(outfile)))
+		.pipe(gulp.dest(path.dirname(outfile)));
+}
+
+function min(done) {
+	const browserify = require('browserify');
+	const uglify = require('gulp-uglify');
+	const makeVinylStream = require('vinyl-source-stream');
+	const makeVinylBuffer = require('vinyl-buffer');
+
+	const browserifyConfig = require('../config/browserify');
+	const uglifyConfig = require('../config/uglify');
+
+	const {outfile, ...options} = browserifyConfig.min;
+
+	return browserify(options)
+		.bundle()
+		.pipe(makeVinylStream(path.basename(outfile)))
+		.pipe(makeVinylBuffer())
+		.pipe(uglify(uglifyConfig.basic))
+		.pipe(gulp.dest(path.dirname(outfile)));
+}

@@ -2,10 +2,7 @@ const path = require('path');
 const derequire = require('browserify-derequire');
 const collapse = require('bundle-collapser/plugin');
 
-const PACKAGE_NAME = require('../../package.json').name;
-const PACKAGES_PATH = './packages';
-const DIST_PATH = './lib';
-const ENTRY_FILE = 'entry.js';
+require('./paths');
 
 const basic = {
 	entries: [ENTRY_FILE],
