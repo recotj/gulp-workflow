@@ -1,3 +1,5 @@
+'use strict';
+
 let initialized = false;
 
 module.exports = (config) => {
