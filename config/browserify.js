@@ -21,4 +21,5 @@ const min = {
 	plugin: [derequire, collapse]
 };
 
-module.exports = {basic, min};
+module.exports.basic = basic;
+module.exports.min = min;

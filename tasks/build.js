@@ -79,7 +79,9 @@ function basic(done) {
 	const makeVinylStream = require('vinyl-source-stream');
 	const browserifyConfig = require('../config/browserify');
 
-	const {outfile, ...options} = browserifyConfig.basic;
+	const options = Object.assign({}, browserifyConfig.basic);
+	const outfile = options.outfile;
+	delete options.outfile;
 
 	return browserify(options)
 		.bundle()
@@ -96,7 +98,9 @@ function min(done) {
 	const browserifyConfig = require('../config/browserify');
 	const uglifyConfig = require('../config/uglify');
 
-	const {outfile, ...options} = browserifyConfig.min;
+	const options = Object.assign({}, browserifyConfig.min);
+	const outfile = options.outfile;
+	delete options.outfile;
 
 	return browserify(options)
 		.bundle()
