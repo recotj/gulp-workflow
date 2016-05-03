@@ -29,6 +29,6 @@ function getPackageJSON(moduleId) {
 	const execSync = require('child_process').execSync;
 	const path = require('path');
 
-	moduleId = moduleId || execSync('npm prefix', {cwd: __dirname}).toString('utf8').replace(/[\r\n\s]+$/, '');
+	moduleId = moduleId || execSync('npm prefix', { cwd: __dirname }).toString('utf8').replace(/[\r\n\s]+$/, '');
 	return require(path.resolve(moduleId, 'package.json'));
 }
