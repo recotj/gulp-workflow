@@ -1,32 +1,32 @@
 const Path = require('path');
 
-const UnixPathSep = '/';
+const PosixPathSep = Path.posix.sep;
 const Win32PathSep = Path.win32.sep;
 
 const isWin32 = (Path.win32 === Path);
 
 module.exports.replace = replace;
-module.exports.toUnixPth = toUnixPath;
+module.exports.toPosixPath = toPosixPath;
 module.exports.toWin32Path = toWin32Path;
 
 function replace(path, pattern, replacement) {
-	path = toUnixPath(path);
+	path = toPosixPath(path);
 	path = path.replace(pattern, replacement);
 
 	if (isWin32) return toWin32Path(path);
 	return path;
 }
 
-function toUnixPath(path) {
+function toPosixPath(path) {
 	checkArg(path);
 	if (!path) return '/';
-	return path.split(Win32PathSep).join(UnixPathSep);
+	return path.split(Win32PathSep).join(PosixPathSep);
 }
 
 function toWin32Path(path) {
 	checkArg(path);
 	if (!path) return '/';
-	return path.split(UnixPathSep).join(UnixPathSep);
+	return path.split(PosixPathSep).join(PosixPathSep);
 }
 
 function checkArg(path) {

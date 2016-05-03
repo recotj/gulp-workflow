@@ -5,7 +5,6 @@ module.exports = (config) => {
 	initialized = true;
 
 	initWorkFlowConfig(config);
-	initWorkFlowDeps();
 };
 
 function initWorkFlowConfig(config) {
@@ -19,22 +18,4 @@ function initWorkFlowConfig(config) {
 
 	global.PACKAGE_NAME = String(out).replace(/[\r\n\s]+$/, '');
 	global.PROJECT_NAME = global.PACKAGE_NAME;
-}
-
-function initWorkFlowDeps() {
-	const execSync = require('child_process').execSync;
-	const deps = [
-		'browserify-derequire',
-		'bundle-collapser',
-		'del',
-		'gulp',
-		'gulp-plumber',
-		'gulp-plumber',
-		'gulp-util',
-		'gulp-newer',
-		'through2',
-		'gulp-babel',
-		'chalk'
-	];
-	execSync('npm install')
 }
