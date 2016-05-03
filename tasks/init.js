@@ -1,7 +1,9 @@
 'use strict';
 
-const pkgJSON = require('../package.json');
+const pkgJSON = getPackageJSON();
 const where = pkgJSON['_where'];
+
+if (!where) return;
 
 let initialized = false;
 
@@ -13,14 +15,20 @@ module.exports = (config) => {
 };
 
 function initWorkFlowConfig(config) {
-	const Path = require('path');
-
 	config = config || {};
 
 	global.PACKAGES_PATH = config.PACKAGES_PATH || 'packages';
 	global.DIST_PATH = config.DIST_PATH || 'lib';
 	global.ENTRY_FILE = config.ENTRY_FILE || 'entry.js';
 	global.PACKAGE_PREFIX = config.PACKAGE_PREFIX || '';
-	global.PACKAGE_NAME = require(Path.resolve(where, 'package.json')).name;
+	global.PACKAGE_NAME = getPackageJSON(where).name;
 	global.PROJECT_NAME = global.PACKAGE_NAME;
+}
+
+function getPackageJSON(moduleId) {
+	const execSync = require('child_process').execSync;
+	const path = require('path');
+
+	moduleId = moduleId || execSync('npm prefix').toString('utf8').replace(/[\r\n\s]+$/, '');
+	return require(path.resolve(moduleId, 'package.json'));
 }
