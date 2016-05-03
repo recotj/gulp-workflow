@@ -3,7 +3,7 @@
 const pkgJSON = getPackageJSON();
 const where = pkgJSON['_where'];
 
-if (!where) return;
+if (!where) throw new Error('no parent module found.');
 
 let initialized = false;
 
