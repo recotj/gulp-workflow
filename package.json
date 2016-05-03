@@ -1,6 +1,6 @@
 {
   "name": "gulp-workflow",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "a workflow library based on gulp",
   "main": "index.js",
   "directories": {
