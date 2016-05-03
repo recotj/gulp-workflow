@@ -2,8 +2,6 @@ const path = require('path');
 const derequire = require('browserify-derequire');
 const collapse = require('bundle-collapser/plugin');
 
-require('./paths');
-
 const basic = {
 	entries: [ENTRY_FILE],
 	basedir: DIST_PATH,
