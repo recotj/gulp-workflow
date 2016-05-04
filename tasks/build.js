@@ -1,8 +1,6 @@
 const path = require('path');
 const gulp = require('gulp');
 
-const replace = require('../tools/paths').replace;
-
 module.exports.packages = packages;
 module.exports.modules = modules;
 module.exports.entry = entry;
@@ -17,6 +15,8 @@ function packages(done) {
 	const babel = require('gulp-babel');
 	const chalk = require('chalk');
 
+	const replace = require('../utils/paths').replace;
+
 	return gulp.src(`${PACKAGES_PATH}/*/src/**/*.js`)
 		.pipe(plumber({
 			errorHandler(err) {
@@ -25,7 +25,7 @@ function packages(done) {
 		}))
 		.pipe(through.obj((file, enc, callback) => {
 			const path = file.srcPath = file.path;
-			file.path = replace(path, /(packages\/[^\/]+)\/src\//, '$1/lib/');
+			file.path = replace(path, new RegExp(`(${PACKAGES_PATH}\\/[^\\/]+)\\/src\\/`), '$1/lib/');
 			callback(null, file);
 		}))
 		.pipe(newer(PACKAGES_PATH))
@@ -51,6 +51,8 @@ function modules(done) {
 }
 
 function entry(done) {
+	'use strict';
+
 	const stream = require('stream');
 	const pass = stream.PassThrough();
 	const fs = require('fs');
@@ -58,13 +60,24 @@ function entry(done) {
 
 	fs.readdir(DIST_PATH, (error, files) => {
 		if (error) return console.error(error);
+
 		const scripts = [];
+
 		files.forEach((filename) => {
+			let shouldRequireInEntry = false;
+			try {
+				require.resolve(`./${DIST_PATH}/${filename}`);
+				shouldRequireInEntry = true;
+			} catch (e) {
+			}
+			if (!shouldRequireInEntry) return;
+
 			const prefixTrimmed = PACKAGE_PREFIX ? filename.replace(PACKAGE_PREFIX, '') : filename;
 			const key = prefixTrimmed.replace(/-([a-z])/g, (m, p1) => p1.toUpperCase());
 			const script = `module.exports['${key}'] = require('./${filename}');`;
 			scripts.push(script);
 		});
+		
 		pass.end(new Buffer(scripts.join('\n'), 'utf8'));
 
 		const out = pass.pipe(makeVinylStream(ENTRY_FILE))
