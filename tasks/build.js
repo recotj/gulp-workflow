@@ -9,7 +9,6 @@ function modules(done) {
 	const plumber = require('gulp-plumber');
 	const through = require('through2');
 	const babel = require('gulp-babel');
-	const add = require('gulp-add-src');
 
 	const base = path.resolve(SRC_PATH);
 	const entry = path.resolve(SRC_PATH, ENTRY_FILE);
