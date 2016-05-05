@@ -5,6 +5,14 @@ const where = pkgJSON['_where'];
 
 if (!where) throw new Error('no parent module found.');
 
+// init value
+global.PACKAGES_PATH = 'packages';
+global.DIST_PATH = 'lib';
+global.ENTRY_FILE = 'entry.js';
+global.PACKAGE_PREFIX = '';
+global.PACKAGE_NAME = getPackageJSON(where).name;
+global.PROJECT_NAME = global.PACKAGE_NAME;
+
 let initialized = false;
 
 module.exports = (config) => {
@@ -15,14 +23,11 @@ module.exports = (config) => {
 };
 
 function initWorkFlowConfig(config) {
-	config = config || {};
+	if (!config) return;
 
-	global.PACKAGES_PATH = config.PACKAGES_PATH || 'packages';
-	global.DIST_PATH = config.DIST_PATH || 'lib';
-	global.ENTRY_FILE = config.ENTRY_FILE || 'entry.js';
-	global.PACKAGE_PREFIX = config.PACKAGE_PREFIX || '';
-	global.PACKAGE_NAME = getPackageJSON(where).name;
-	global.PROJECT_NAME = global.PACKAGE_NAME;
+	['PACKAGES_PATH', 'DIST_PATH', 'ENTRY_FILE', 'PACKAGE_PREFIX'].forEach((key) => {
+		if (config[key]) global[key] = config[key];
+	});
 }
 
 function getPackageJSON(moduleId) {

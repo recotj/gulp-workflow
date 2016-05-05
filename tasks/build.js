@@ -33,7 +33,7 @@ function packages(done) {
 		}))
 		.pipe(babel())
 		.pipe(add(`${PACKAGES_PATH}/*/package.json`))
-		.pipe(gulp.dest(PACKAGES_PATH));
+		.pipe(gulp.dest(DIST_PATH));
 }
 
 function entry(done) {
