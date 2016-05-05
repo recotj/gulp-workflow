@@ -1,4 +1,3 @@
-const path = require('path');
 const gulp = require('gulp');
 
 module.exports.packages = packages;
@@ -14,6 +13,7 @@ function packages(done) {
 	const through = require('through2');
 	const babel = require('gulp-babel');
 	const chalk = require('chalk');
+	const add = require('gulp-add-src');
 
 	const replace = require('../utils/paths').replace;
 
@@ -24,30 +24,17 @@ function packages(done) {
 			}
 		}))
 		.pipe(through.obj((file, enc, callback) => {
-			const path = file.srcPath = file.path;
-			file.path = replace(path, new RegExp(`(${PACKAGES_PATH}\\/[^\\/]+)\\/src\\/`), '$1/lib/');
-			callback(null, file);
-		}))
-		.pipe(newer(PACKAGES_PATH))
-		.pipe(through.obj((file, enc, callback) => {
-			gutil.log('compiling', `'${chalk.cyan(file.srcPath)}'...`);
+			const srcPattern = new RegExp(`${PACKAGES_PATH}(\\/[^\\/]+)\\/src\\/`);
+			const distPattern = `${DIST_PATH}/$1/lib/`;
+			const path = file.path;
+
+			file.path = replace(path, srcPattern, distPattern);
+			gutil.log('compiling', `'${chalk.cyan(path)}'...`);
 			callback(null, file);
 		}))
 		.pipe(babel())
+		.pipe(add(`${PACKAGES_PATH}/*/package.json`))
 		.pipe(gulp.dest(PACKAGES_PATH));
-}
-
-function modules(done) {
-	const plumber = require('gulp-plumber');
-	const gutil = require('gulp-util');
-
-	return gulp.src([`${PACKAGES_PATH}/*/lib/**/*.js`, `${PACKAGES_PATH}/*/package.json`])
-		.pipe(plumber({
-			errorHandler(err) {
-				gutil.log(err.stack);
-			}
-		}))
-		.pipe(gulp.dest(DIST_PATH));
 }
 
 function entry(done) {
@@ -77,7 +64,7 @@ function entry(done) {
 			const script = `module.exports['${key}'] = require('./${filename}');`;
 			scripts.push(script);
 		});
-		
+
 		pass.end(new Buffer(scripts.join('\n'), 'utf8'));
 
 		const out = pass.pipe(makeVinylStream(ENTRY_FILE))
@@ -88,6 +75,7 @@ function entry(done) {
 }
 
 function basic(done) {
+	const path = require('path');
 	const browserify = require('browserify');
 	const makeVinylStream = require('vinyl-source-stream');
 	const browserifyConfig = require('../config/browserify');
@@ -103,6 +91,7 @@ function basic(done) {
 }
 
 function min(done) {
+	const path = require('path');
 	const browserify = require('browserify');
 	const uglify = require('gulp-uglify');
 	const makeVinylStream = require('vinyl-source-stream');
