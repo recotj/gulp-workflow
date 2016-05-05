@@ -1,7 +1,6 @@
 const gulp = require('gulp');
 
 module.exports.packages = packages;
-module.exports.modules = modules;
 module.exports.entry = entry;
 module.exports.basic = basic;
 module.exports.min = min;
