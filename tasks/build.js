@@ -5,6 +5,8 @@ module.exports.entry = entry;
 module.exports.basic = basic;
 module.exports.min = min;
 
+const cwd = process.cwd();
+
 function packages(done) {
 	const plumber = require('gulp-plumber');
 	const gutil = require('gulp-util');
@@ -42,6 +44,7 @@ function entry(done) {
 	const stream = require('stream');
 	const pass = stream.PassThrough();
 	const fs = require('fs');
+	const path = require('path');
 	const makeVinylStream = require('vinyl-source-stream');
 
 	fs.readdir(DIST_PATH, (error, files) => {
@@ -52,7 +55,7 @@ function entry(done) {
 		files.forEach((filename) => {
 			let shouldRequireInEntry = false;
 			try {
-				require.resolve(`./${DIST_PATH}/${filename}`);
+				require.resolve(path.resolve(cwd, DIST_PATH, filename));
 				shouldRequireInEntry = true;
 			} catch (e) {
 			}
