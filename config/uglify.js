@@ -10,4 +10,4 @@ const basic = {
 	}
 };
 
-module.exports = {basic};
+module.exports.basic = basic;

@@ -1,6 +1,8 @@
+/.DS_Store/
 /.idea/
 /node_modules/
+/bower_components/
 /dist/
 /lib/
-/packages/*/lib
+/packages/*/lib/
 /npm-debug.log*
