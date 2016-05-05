@@ -7,6 +7,7 @@ module.exports.min = min;
 function modules(done) {
 	const path = require('path');
 	const plumber = require('gulp-plumber');
+	const gutil = require('gulp-util');
 	const through = require('through2');
 	const babel = require('gulp-babel');
 
