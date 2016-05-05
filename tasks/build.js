@@ -11,10 +11,9 @@ function modules(done) {
 	const through = require('through2');
 	const babel = require('gulp-babel');
 
-	const base = path.resolve(SRC_PATH);
 	const entry = path.resolve(SRC_PATH, ENTRY_FILE);
 
-	return gulp.src('**/*.js', { base: base })
+	return gulp.src(`${SRC_PATH}/**/*.js`)
 		.pipe(plumber({
 			errorHandler(err) {
 				gutil.log(err.stack);
