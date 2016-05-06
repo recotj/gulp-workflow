@@ -5,8 +5,6 @@ module.exports.entry = entry;
 module.exports.basic = basic;
 module.exports.min = min;
 
-const cwd = process.cwd();
-
 function packages(done) {
 	const plumber = require('gulp-plumber');
 	const gutil = require('gulp-util');
@@ -15,27 +13,54 @@ function packages(done) {
 	const babel = require('gulp-babel');
 	const chalk = require('chalk');
 	const add = require('gulp-add-src');
+	const merge = require('merge-stream');
 
 	const replace = require('../utils/paths').replace;
 
-	return gulp.src(`${PACKAGES_PATH}/*/src/**/*.js`)
-		.pipe(plumber({
-			errorHandler(err) {
-				gutil.log(err.stack);
-			}
-		}))
-		.pipe(through.obj((file, enc, callback) => {
-			const srcPattern = new RegExp(`${PACKAGES_PATH}(\\/[^\\/]+)\\/src\\/`);
-			const distPattern = `${DIST_PATH}/$1/lib/`;
-			const path = file.path;
+	return merge(compilePackages(done), collectPackageDeps(done));
 
-			file.path = replace(path, srcPattern, distPattern);
-			gutil.log('compiling', `'${chalk.cyan(path)}'...`);
-			callback(null, file);
-		}))
-		.pipe(babel())
-		.pipe(add(`${PACKAGES_PATH}/*/package.json`))
-		.pipe(gulp.dest(DIST_PATH));
+	function compilePackages(done) {
+		return gulp.src(`${PACKAGES_PATH}/*/src/**/*.js`)
+			.pipe(plumber({
+				errorHandler(err) {
+					gutil.log(err.stack);
+				}
+			}))
+			.pipe(through.obj((file, enc, callback) => {
+				const srcPattern = new RegExp(`${PACKAGES_PATH}(\\/[^\\/]+)\\/src\\/`);
+				const distPattern = `${DIST_PATH}/$1/lib/`;
+				const path = file.path;
+
+				file.path = replace(path, srcPattern, distPattern);
+				gutil.log('compiling', `'${chalk.cyan(path)}'...`);
+				callback(null, file);
+			}))
+			.pipe(babel())
+			.pipe(add(`${PACKAGES_PATH}/*/package.json`))
+			.pipe(gulp.dest(DIST_PATH));
+	}
+
+	function collectPackageDeps(done) {
+		return gulp.src(`${PACKAGE_ROOT}/package.json`, { base: PACKAGE_ROOT })
+			.pipe(through.obj((file, encoding, callback) => {
+				const pkgJSON = JSON.parse(file.contents.toString('utf8'));
+				const deps = pkgJSON['dependencies'] || (pkgJSON['dependencies'] = {});
+				const devDeps = pkgJSON['devDependencies'] || (pkgJSON['devDependencies'] = {});
+
+				gulp.src(`${PACKAGES_PATH}/*/package.json`)
+					.pipe(through.obj((file, encoding, callback) => {
+						const pkgJSON = JSON.parse(file.contents.toString('utf8'));
+						Object.assign(deps, pkgJSON['dependencies']);
+						Object.assign(devDeps, pkgJSON['devDependencies']);
+						callback(null, file);
+					}, (callback_) => {
+						file.contents = new Buffer(JSON.stringify(pkgJSON, null, '  '), 'utf8');
+						callback_();
+						callback(null, file);
+					}))
+			}))
+			.pipe(gulp.dest(PACKAGE_ROOT));
+	}
 }
 
 function entry(done) {
@@ -55,7 +80,7 @@ function entry(done) {
 		files.forEach((filename) => {
 			let shouldRequireInEntry = false;
 			try {
-				require.resolve(path.resolve(cwd, DIST_PATH, filename));
+				require.resolve(path.resolve(DIST_PATH, filename));
 				shouldRequireInEntry = true;
 			} catch (e) {
 			}

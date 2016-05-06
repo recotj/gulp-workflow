@@ -1,17 +1,17 @@
 'use strict';
 
-const pkgJSON = getPackageJSON();
-const where = pkgJSON['_where'];
+const root = getPackageJSON()['_where'];
 
-if (!where) throw new Error('no parent module found.');
+if (!root) throw new Error('no package root found.');
 
 // init value
 global.PACKAGES_PATH = 'packages';
 global.DIST_PATH = 'lib';
 global.ENTRY_FILE = 'entry.js';
 global.PACKAGE_PREFIX = '';
-global.PACKAGE_NAME = getPackageJSON(where).name;
+global.PACKAGE_NAME = getPackageJSON(root).name;
 global.PROJECT_NAME = global.PACKAGE_NAME;
+global.PACKAGE_ROOT = root;
 
 let initialized = false;
 
